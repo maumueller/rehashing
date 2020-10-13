@@ -21,7 +21,7 @@ def download(src, dst):
 def get_dataset_fn(dataset):
     if not os.path.exists('resources/data'):
         os.mkdir('resources/data')
-    return (os.path.join('resources', 'data', '%s.txt' % dataset), 
+    return (os.path.join('resources', 'data', '%s.txt' % dataset),
             os.path.join('resources', 'data', '%s.conf' % dataset))
 
 def get_exact_fn(dataset):
@@ -58,7 +58,7 @@ def write_output(X, fn, config_fn):
     dataset_name = fn.split("/")[-1]
 
     config = """
-    gaussian { 
+    gaussian {
         name = "%s";
         fpath = "%s";
         qpath = "%s";
@@ -90,7 +90,7 @@ def write_output(X, fn, config_fn):
 
 
 def covtype(out_fn, config_fn):
-    import gzip 
+    import gzip
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/covtype/covtype.data.gz"
     fn = os.path.join('data', 'covtype.gz')
     download(url, fn)
@@ -100,7 +100,20 @@ def covtype(out_fn, config_fn):
             X.append([int(x) for x in line.strip().split(",")])
     write_output(numpy.array(X), out_fn, config_fn)
 
-
+def shuttle(out_fn, config_fn):
+    import zipfile
+    X = []
+    for dn in ("shuttle.trn.Z", "shuttle.tst"):
+        url = "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/shuttle/%s" % dn
+        fn = os.path.join("data", dn)
+        download(url, fn)
+        if fn.endswith(".Z"):
+            os.system("uncompress " + fn)
+            fn = fn[:-2]
+        with open(fn) as f:
+            for line in f:
+                X.append([int(x) for x in line.split()])
+    write_output(numpy.array(X), out_fn, config_fn)
 
 def glove(out_fn, config_fn, d):
     import zipfile
@@ -271,7 +284,8 @@ DATASETS = {
     'sift-128-euclidean': sift,
     'lastfm-64-dot': lambda out_fn: lastfm(out_fn, config_fn, 64),
     'covtype': lambda out_fn, config_fn: covtype(out_fn, config_fn),
-    'svhn': lambda out_fn, config_fn: svhn(out_fn, config_fn, 'extra'), 
+    'shuttle': lambda out_fn, config_fn: shuttle(out_fn, config_fn),
+    'svhn': lambda out_fn, config_fn: svhn(out_fn, config_fn, 'extra'),
     'svhn-small': lambda out_fn, config_fn: svhn(out_fn, config_fn, 'test'),
 }
 
