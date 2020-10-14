@@ -45,7 +45,7 @@ def get_dataset(which):
 
 # Everything below this line is related to creating datasets
 
-def write_output(X, fn, config_fn):
+def write_output(X, fn, config_fn, queries=10000):
     from scipy import stats
     n = 0
     f = open(fn, 'w')
@@ -66,7 +66,7 @@ def write_output(X, fn, config_fn):
         kernel = "gaussian";
         n = "%d";
         d = "%d";
-        m = "10000";
+        m = "%d";
         h = "2";
         bw_const = "false";
         ignore_header = "false";
@@ -79,7 +79,7 @@ def write_output(X, fn, config_fn):
         beta = "0.5";
     }
     """ % (dataset_name, fn, fn, get_exact_fn(dataset_name),
-            X.shape[0], X.shape[1] - 1, X.shape[1] - 1)
+            X.shape[0], X.shape[1] - 1, queries, X.shape[1] - 1)
     f.write(config)
     f.close()
     print("finding bruteforce values")
@@ -169,7 +169,7 @@ def svhn(out_fn, config_fn, version):
     X = loadmat(fn)['X']
     d = numpy.prod(X.shape[:3])
     Y = numpy.reshape(X, (d, X.shape[3])).T
-    write_output(Y, out_fn, config_fn)
+    write_output(Y, out_fn, config_fn, 500)
 
 def _load_mnist_vectors(fn):
     import gzip
