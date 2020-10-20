@@ -120,13 +120,13 @@ int main(int argc, char *argv[]) {
         std::cout << "Sketch HBE total time: " << sketch.totalTime / 1e9 << std::endl;
         std::cout << "Sketch (3 scales) HBE total time: " << sketch4.totalTime / 1e9 << std::endl;
         std::cout << "RS Sampling total time: " << rs.totalTime / 1e9 << std::endl;
-        printf("Uniform HBE relative error: %f, %f, %f\n",
+        printf("Uniform HBE relative error (avg/std/max): %f, %f, %f\n",
                 dataUtils::getAvg(hbe_error), dataUtils::getStd(hbe_error), dataUtils::getMax(hbe_error));
-        printf("Sketch HBE relative error:  %f, %f, %f\n",
+        printf("Sketch HBE relative error (avg/std/max):  %f, %f, %f\n",
                dataUtils::getAvg(sketch_error), dataUtils::getStd(sketch_error), dataUtils::getMax(sketch_error));
-        printf("Sketch (3 scales)  HBE relative error:  %f, %f, %f\n",
+        printf("Sketch (3 scales) HBE relative error (avg/std/max) :  %f, %f, %f\n",
                dataUtils::getAvg(sketch_scale_error),dataUtils:: getStd(sketch_scale_error), dataUtils::getMax(sketch_scale_error));
-        printf("RS relative error:  %f, %f, %f\n",
+        printf("RS relative error(avg/std/max) :  %f, %f, %f\n",
                dataUtils::getAvg(rs_error), dataUtils::getStd(rs_error), dataUtils::getMax(rs_error));
     }
 }
