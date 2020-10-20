@@ -79,9 +79,11 @@ int main(int argc, char *argv[]) {
     std::cout << "RS reservoir size: " << rs_size << std::endl;
     RS rs(data.X_ptr, data.kernel, rs_size);
 
+    bool hbe_done = false, hbs_done = false, hbs3_done = false, rs_done = false;
 
-    for (int i = 0; i < 10; i ++) {
-        int samples = 100 * (i + 1);
+    int samples = 50;
+    do {
+        samples *= 2;
         std::cout << "------------------" << std::endl;
         std::cout << "HBE samples: " << samples << ", RS samples: " << int(samples * data.sample_ratio) << std::endl;
         hbe.totalTime = 0;
@@ -106,27 +108,60 @@ int main(int argc, char *argv[]) {
             double exact_val = data.exact[idx];
             if (exact_val < data.tau) { continue; }
 
-            double hbe_est = hbe.query(q, data.tau, samples);
-            double sketch_est = sketch.query(q, data.tau, samples);
-            double sketch_scale_est = sketch4.query(q, data.tau, samples);
-            double rs_est = rs.query(q, data.tau, int(samples * data.sample_ratio));
-            hbe_error.push_back(relErr(hbe_est, exact_val));
-            rs_error.push_back(relErr(rs_est, exact_val));
-            sketch_error.push_back(relErr(sketch_est,exact_val));
-            sketch_scale_error.push_back(relErr(sketch_scale_est, exact_val));
+            if (!hbe_done) {
+                double hbe_est = hbe.query(q, data.tau, samples);
+                hbe_error.push_back(relErr(hbe_est, exact_val));
+            }
+            if (!hbs_done) {
+                double sketch_est = sketch.query(q, data.tau, samples);
+                sketch_error.push_back(relErr(sketch_est,exact_val));
+            }
+            if (!hbs3_done) {
+                double sketch_scale_est = sketch4.query(q, data.tau, samples);
+                sketch_scale_error.push_back(relErr(sketch_scale_est, exact_val));
+            }
+            if (!rs_done) {
+                double rs_est = rs.query(q, data.tau, int(samples * data.sample_ratio));
+                rs_error.push_back(relErr(rs_est, exact_val));
+            }
+
         }
 
         std::cout << "Uniform HBE total time: " << hbe.totalTime / 1e9 << std::endl;
         std::cout << "Sketch HBE total time: " << sketch.totalTime / 1e9 << std::endl;
         std::cout << "Sketch (3 scales) HBE total time: " << sketch4.totalTime / 1e9 << std::endl;
         std::cout << "RS Sampling total time: " << rs.totalTime / 1e9 << std::endl;
-        printf("Uniform HBE relative error (avg/std/max): %f, %f, %f\n",
-                dataUtils::getAvg(hbe_error), dataUtils::getStd(hbe_error), dataUtils::getMax(hbe_error));
-        printf("Sketch HBE relative error (avg/std/max):  %f, %f, %f\n",
-               dataUtils::getAvg(sketch_error), dataUtils::getStd(sketch_error), dataUtils::getMax(sketch_error));
-        printf("Sketch (3 scales) HBE relative error (avg/std/max) :  %f, %f, %f\n",
-               dataUtils::getAvg(sketch_scale_error),dataUtils:: getStd(sketch_scale_error), dataUtils::getMax(sketch_scale_error));
-        printf("RS relative error(avg/std/max) :  %f, %f, %f\n",
-               dataUtils::getAvg(rs_error), dataUtils::getStd(rs_error), dataUtils::getMax(rs_error));
-    }
+        if (!hbe_done) {
+            printf("Uniform HBE relative error (avg/std/max): %f, %f, %f\n",
+                    dataUtils::getAvg(hbe_error), dataUtils::getStd(hbe_error), dataUtils::getMax(hbe_error));
+            auto avg_error = dataUtils::getAvg(hbe_error);
+            if (avg_error < 0.1) {
+                hbe_done = true;
+            }
+        }
+        if (!hbs_done) {
+            printf("Sketch HBE relative error (avg/std/max):  %f, %f, %f\n",
+                   dataUtils::getAvg(sketch_error), dataUtils::getStd(sketch_error), dataUtils::getMax(sketch_error));
+            auto avg_error = dataUtils::getAvg(sketch_error);
+            if (avg_error < 0.1) {
+                hbs_done = true;
+            }
+        }
+        if (!hbs3_done) {
+            printf("Sketch (3 scales) HBE relative error (avg/std/max) :  %f, %f, %f\n",
+                   dataUtils::getAvg(sketch_scale_error),dataUtils:: getStd(sketch_scale_error), dataUtils::getMax(sketch_scale_error));
+            auto avg_error = dataUtils::getAvg(sketch_scale_error);
+            if (avg_error < 0.1) {
+                hbs3_done = true;
+            }
+        }
+        if (!rs_done) {
+            printf("RS relative error(avg/std/max) :  %f, %f, %f\n",
+                   dataUtils::getAvg(rs_error), dataUtils::getStd(rs_error), dataUtils::getMax(rs_error));
+            auto avg_error = dataUtils::getAvg(rs_error);
+            if (avg_error < 0.1) {
+                rs_done = true;
+            }
+        }
+    } while (!hbe_done || !hbs_done || !hbs3_done || !rs_done);
 }
