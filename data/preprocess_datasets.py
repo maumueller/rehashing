@@ -275,7 +275,7 @@ def lastfm(out_fn, config_fn, n_dimensions, test_size=50000):
 
 DATASETS = {
     'fashion-mnist-784-euclidean': fashion_mnist,
-    'glove-100-angular': lambda out_fn: glove(out_fn, config_fn, 100),
+    'glove-100-angular': lambda out_fn, config_fn: glove(out_fn, config_fn, 100),
     'mnist-784-euclidean': mnist,
     'random-xs-20-euclidean': lambda out_fn: random_float(out_fn, config_fn, 20, 10000, 100,
                                                     'euclidean'),
