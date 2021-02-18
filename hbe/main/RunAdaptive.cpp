@@ -19,11 +19,6 @@
 #include "../utils/DataIngest.h"
 #include "parseConfig.h"
 
-void update(vector<double>& results, vector<double> est, double exact) {
-    results[0] += fabs(est[0] - exact) / exact;
-    results[1] += est[1];
-}
-
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cout << "Need config file" << std::endl;
@@ -33,6 +28,8 @@ int main(int argc, char *argv[]) {
     char *scope = argv[2];
     double eps = atof(argv[3]);
     bool random = (argc > 4);
+
+    std::cout << argc << std::endl;
 
     parseConfig cfg(argv[1], scope);
     DataIngest data(cfg, true);
@@ -52,7 +49,9 @@ int main(int argc, char *argv[]) {
     }
 
     est->totalTime = 0;
-    vector<double> results(2,0);
+    vector<double> relerr;
+    vector<double> samples;
+    vector<double> times;
 
     for (int j = 0; j < data.M; j++) {
         int idx = j * 2;
@@ -64,11 +63,19 @@ int main(int argc, char *argv[]) {
                 q = data.X_ptr->row(data.exact[idx + 1]);
             }
         }
+        auto t1 = std::chrono::high_resolution_clock::now();
         vector<double> estimates = est->query(q);
-        update(results, estimates, data.exact[idx]);
+        auto t2 = std::chrono::high_resolution_clock::now();
+        relerr.push_back(fabs(estimates[0] - data.exact[idx]));
+        samples.push_back(estimates[1]);
+        times.push_back((t2-t1).count() / 1e6);
     }
 
-    std::cout << "Sampling total time: " << est->totalTime / 1e9 << std::endl;
-    std::cout << "Average Samples: " << results[1] / data.M << std::endl;
-    std::cout << "Relative Error: " << results[0] / data.M << std::endl;
+    for (int i = 0; i < data.M; i++) {
+        std::cout << "RESULT id=" << i << " err=" << relerr[i] << " samples=" << samples[i] << " time=" << times[i] << std::endl;
+    }
+
+    //std::cout << "Sampling total time: " << est->totalTime / 1e9 << std::endl;
+    //std::cout << "Average Samples: " << results[1] / data.M << std::endl;
+    //std::cout << "Relative Error: " << results[0] / data.M << std::endl;
 }
