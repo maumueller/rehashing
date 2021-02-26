@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
         auto t1 = std::chrono::high_resolution_clock::now();
         vector<double> estimates = est->query(q);
         auto t2 = std::chrono::high_resolution_clock::now();
-        relerr.push_back(fabs(estimates[0] - data.exact[idx]));
+        relerr.push_back(estimates[0]);
         samples.push_back(estimates[1]);
         times.push_back((t2-t1).count() / 1e6);
     }
