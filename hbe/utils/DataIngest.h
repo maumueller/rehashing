@@ -58,10 +58,6 @@ public:
 
         // Read query dataset if it's a in a seperate file
         hasQuery = strcmp(cfg.getDataFile(), cfg.getQueryFile());
-        if (hasQuery != 0) {
-            Y_ptr = make_shared<MatrixXd>(dataUtils::readFile(cfg.getQueryFile(),
-                                                          cfg.ignoreHeader(), M, cfg.getStartCol(), cfg.getEndCol()));
-        }
 
         // Get bandwidth
         h = cfg.getH();
@@ -89,6 +85,12 @@ public:
         X = dataUtils::normalizeBandwidth(X, band->bw);
         X_ptr = make_shared<MatrixXd>(X);
 
+        if (hasQuery != 0) {
+            MatrixXd Y = dataUtils::readFile(cfg.getQueryFile(), 
+                    cfg.ignoreHeader(), M, cfg.getStartCol(), cfg.getEndCol());
+            Y = dataUtils::normalizeBandwidth(Y, band->bw);
+            Y_ptr = make_shared<MatrixXd>(Y);
+        }
         // Whether or not to read ground truth KDE
         if (read_exact) {
             exact = new double[M * 2];
