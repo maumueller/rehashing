@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     }
 
     est->totalTime = 0;
-    vector<double> relerr;
+    vector<double> estimate;
     vector<double> samples;
     vector<double> times;
 
@@ -66,13 +66,13 @@ int main(int argc, char *argv[]) {
         auto t1 = std::chrono::high_resolution_clock::now();
         vector<double> estimates = est->query(q);
         auto t2 = std::chrono::high_resolution_clock::now();
-        relerr.push_back(estimates[0]);
+        estimate.push_back(estimates[0]);
         samples.push_back(estimates[1]);
         times.push_back((t2-t1).count() / 1e6);
     }
 
     for (int i = 0; i < data.M; i++) {
-        std::cout << "RESULT id=" << i << " err=" << relerr[i] << " samples=" << samples[i] << " time=" << times[i] << std::endl;
+        std::cout << "RESULT id=" << i << " est=" << estimate[i] << " samples=" << samples[i] << " time=" << times[i] << std::endl;
     }
 
     //std::cout << "Sampling total time: " << est->totalTime / 1e9 << std::endl;
